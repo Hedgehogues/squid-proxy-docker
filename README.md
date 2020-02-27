@@ -16,6 +16,8 @@ Minimal config:
     acl CONNECT method CONNECT
     http_access allow all
     http_port 3128
+    
+Listening at 3128
 
 
 This repo implements squid proxy
