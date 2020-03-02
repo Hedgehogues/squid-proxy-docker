@@ -1,4 +1,4 @@
-# squid-proxy
+# squid-proxy is transpanent proxy server
 
 Minimal config:
 
