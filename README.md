@@ -87,9 +87,9 @@ This repo implements squid proxy
     refresh_pattern .               0       20%     4320
     
     
-Comments
+# Comments of config
 
-Первый блок выглядит следующим образом.
+### The first block
 
     acl localnet src 192.168.0.0/24
     acl worktime time 08:00-15:00
@@ -106,16 +106,20 @@ Comments
     acl Safe_ports port 777         # multiling http
     acl CONNECT method CONNECT
 
-Он отвечает за стандартные acl параметры. В нем в localnet изменяем локальную сеть на свою, а также добавляем acl рабочего времени (по желанию). Рабочее время я добавил ввиду того, что ко мне часто приходят учителя с жалобой, что не могут ничего найти, все недоступно. Я, конечно, рад, что все работает, как надо, но, честно говоря, надоело это выслушивать. Теперь на их претензию я сообщаю, что после 15.00 фильтрация отключается, и они могут свободно (почти) найти информацию, которая им нужна. Вы можете добавить свое время, или оставить фильтрацию круглосуточной, не добавляя этот acl.
+He is responsible for standard acl parameters. In it, in localnet, we change the local network to our own, and also add acl of working time (optional). I added working time in view of the fact that teachers often come to me complaining that they cannot find anything, everything is inaccessible. Of course, I'm glad that everything works as it should, but, frankly, I'm tired of listening to this. Now I’m reporting their claim that after 15:00 the filtering is turned off and they can freely (almost) find the information they need. You can add your time, or leave filtering around the clock without adding this acl.
 
-Второй блок определяет списки разрешенных и запрещенных сайтов для HTTP и выглядит следующим образом.
+### The second block
+
+The second block defines the lists of allowed and forbidden sites for HTTP and looks as follows.
 
     acl blacklist url_regex -i "/etc/squid/blacklist"
     acl whitelist url_regex -i "/etc/squid/whitelist"
 
-Списки разрешенных и запрещенных сайтов мы добавим позже, и они будут размещаться в файлах, указанных в acl.
+We will add lists of allowed and forbidden sites later, and they will be placed in files specified in acl.
 
-Третий блок определяет параметры доступа по протоколу HTTP и выглядит вот так
+### The third block
+
+The third block determines the access parameters via HTTP and looks like this
 
     http_access allow localhost
     http_access deny manager
@@ -126,31 +130,40 @@ Comments
     http_access allow whitelist
     http_access deny all worktime
     http_access allow all
+    
+Here the item http_access allow CONNECT is required, since without it Squid would not let anyone on the Internet. Next are the rules on the black and white lists. The deny and allow parameters deny and allow access, respectively. After them comes the rule to completely ban all HTTP traffic during business hours. If you did not set working hours, then delete worktime, and the ban will be permanent. An important point is the order of the rules, as Squid reads them from top to bottom
 
-Здесь пункт http_access allow CONNECT обязателен, так как без него у меня Squid не пускал в интернет никого. Далее идут правила на «черный» и «белый» списки. Параметры deny и allow запрещают и разрешают доступ соответственно. После них идет правило на полный запрет всего HTTP-трафика в рабочее время. Если вы не устанавливали рабочее время, то удалите worktime, и запрет будет постоянным. Важным моментом является порядок правил, так как Squid считывает их сверху вниз
-Четвертый блок определяет параметры портов для Squid.
+### The fourth block
 
+The fourth block defines the port settings for Squid.
 
     http_port 3128
     http_port 3129 intercept
     https_port 3130 intercept ssl-bump options=ALL:NO_SSLv3:NO_SSLv2 connection-auth=off cert=/etc/squid/squid.pem
 
-Первый параметр необходим, чтобы в логах бесконечно не появлялась ошибка «ERROR: No forward-proxy ports configured». Она заполняет лог и, следовательно, память. Распространенная ошибка, но, почему-то, в нашем ru-сегменте я не нашел, как ее исправить, помогли забугорские форумы. Второй параметр определяет порт HTTP протокола. Intercept означает прозрачность Proxy, то есть не будет необходимости прописывать настройки на каждом компьютере.
-Третий параметр определяет порт HTTPS и его опции. Это одна длинная строка. Файл squid.pem — это наш сертификат, который мы создадим позднее.
+The first parameter is necessary so that the “ERROR: No forward-proxy ports configured” error does not appear infinitely in the logs. It fills the log and, therefore, the memory. A common mistake, but for some reason, in our ru-segment I did not find how to fix it, foreign forums helped. The second parameter defines the HTTP protocol port. Intercept means Proxy transparency, that is, there will be no need to prescribe settings on each computer.
 
-Пятый блок определяет параметры работы SSL соединения со Squid-ом. В частности, он указывает направлять весь трафик сразу в интернет, без использования вышестоящих кешей, а последние две разрешают соединение даже с ошибками проверки сертификата, так как окончательно решение о посещении такого ресурса должен осуществлять пользователь, а не сервер. Выглядит так.
+The third parameter defines the HTTPS port and its options. This is one long line. The squid.pem file is our certificate, which we will create later.
+
+### The fifth block
+
+The fifth block defines the parameters of the SSL connection with Squid. In particular, he indicates that all traffic should be directed immediately to the Internet, without using higher caches, and the last two allow connections even with certificate verification errors, since the decision to visit such a resource must be made by the user, not the server. Looks like that.
 
     always_direct allow all
     sslproxy_cert_error allow all
     sslproxy_flags DONT_VERIFY_PEER
 
-Шестой блок задает параметры acl «черного» и «белого» списков, которые будут созданы позднее, а также глубину перехвата HTTPS-трафика.
+### The sixth block
+
+The sixth block sets the acl parameters of the “black” and “white” lists, which will be created later, as well as the depth of interception of HTTPS traffic.
 
     acl blacklist_ssl ssl::server_name_regex -i "/etc/squid/blacklist_ssl"
     acl whitelist_ssl ssl::server_name_regex -i "/etc/squid/whitelist_ssl"
     acl step1 at_step SslBump1
 
-Седьмой блок определяет параметры доступа по протоколу HTTPS. Здесь за запрет и разрешение отвечают уже terminate и splice соответственно. Опять же, не забывайте убрать worktime, если у вас не указано рабочее время.
+### The seventh block
+
+The seventh block determines the access parameters using the HTTPS protocol. Here, the ban and permission are already responsible for terminate and splice, respectively. Again, do not forget to remove worktime if you do not have a specified working time.
 
     ssl_bump peek step1
     ssl_bump terminate blacklist_ssl
@@ -160,15 +173,18 @@ Comments
 
     sslcrtd_program /usr/lib/squid/ssl_crtd -s /var/lib/ssl_db -M 4MB
 
-Восьмой блок задает кеш и лог нашего Squid. Здесь стоит отметить только параметр logfile_rotate, обозначающий количество дней, в течении которых хранится лог.
+# The eighth block
 
-    #Кеш
+The eighth block sets the cache and log of our Squid. Here it is worth noting only the logfile_rotate parameter, which indicates the number of days during which the log is stored.
+
+    # Cache
+    
     cache_mem 512 MB
      maximum_object_size_in_memory 512 KB
      memory_replacement_policy lru
     cache_dir aufs /var/spool/squid 2048 16 256
 
-    #Лог
+    # Log
     access_log daemon:/var/log/squid/access.log squid
     logfile_rotate 1
 
@@ -179,76 +195,77 @@ Comments
     refresh_pattern (Release|Packages(.gz)*)$      0       20%     2880
     refresh_pattern .               0       20%     4320
 
-На этом настройка squid.conf закончена. Сохраняем файл и переходим к созданию сертификата и списков.
+This completes the setup of squid.conf. We save the file and proceed to the creation of the certificate and lists.
 
-Перейдем в папку со Squid
+### Starting 
+
+Let's go to the folder with Squid
 
     cd /etc/squid/
 
-И введем следующую команду для создания сертификата
+And enter the following command to create the certificate
 
     openssl req -new -newkey rsa:1024 -days 36500 -nodes -x509 -keyout squid.pem -out squid.pem
+    
+Next, you will need to enter the certificate data. The certificate is valid for 100 years to forget about it for a long time. It is needed only for Proxy.
 
-Далее необходимо будет ввести данные сертификата. Срок действия сертификата указан 100 лет, чтобы забыть о нем надолго. Нужен он только для Proxy.
-
-Теперь создадим наши файлы списков.
+Now create our list files.
 
     touch blacklist
     touch whitelist
     cp whitelist whitelist_ssl
     cp blacklist blacklist_ssl
 
-Сайты в списки заносим в виде регулярных выражений. Например, чтобы разблокировать mail.ru, откроем whitelist
+Sites are listed in the form of regular expressions. For example, to unlock mail.ru, open whitelist
 
     nano whitelist
 
-и добавим в него следующее выражение.
+and add the following expression to it.
 
     mail\.ru 
 
-Теперь заблокируем Игры.Mail.ru. Откроем наш blacklist
+Now block Games.Mail.ru. Let's open our blacklist
 
     nano blacklist
 
-и запишем в него следующее выражение
+and write the following expression into it
 
     games\.mail\.ru
+    
+Since, as a rule, a blacklist blocker is above our white list, when you switch to mail.ru, the site will open as expected (except for pictures, but more on that later), and if you try to switch to Games, Squid us will not let go.
 
-Так как правило, блокирующее по черному списку, стоит у нас выше белого списка, то, при переходе на mail.ru, сайт будет открываться как положено (за исключением картинок, но об этом позже), а если попытаться перейти на Игры, Squid нас не пустит.
+Some sites have many subdomains, subdomains, etc. As, for example, mail.ru stores its images on imgsmail.ru. Regarding other similar sites, you need to open the desired site in any browser (I use Chrome) and, subsequently, the developer tools (in Chrome they are called by pressing F12).
 
-У некоторых сайтов множество поддоменов, субдоменов и т.д. Как, например, mail.ru хранит свои картинки на imgsmail.ru. Касаемо других подобных сайтов, вам необходимо в любом браузере (я использую Chrome) открыть нужный сайт и, следом, инструменты разработчика (в Chrome вызываются по клавише F12).
+Go to the Sources tab and see what other resources the site loads information from.
 
-
-
-Перейти на вкладку Sources и посмотреть, с каких еще ресурсов сайт подгружает информацию.
-
-Добавив сайты, скопируем их в списки для HTTPS.
+After adding sites, copy them to the lists for HTTPS.
 
     cp whitelist whitelist_ssl
     cp blacklist blacklist_ssl
 
-Совет по заполнению списков
-Теперь проверим конфигурацию.
+# List Fill Tip
+
+Now check the configuration.
 
     squid -k check
 
-Если все хорошо, остановим Squid.
+If all is well, stop Squid.
 
     /etc/init.d/squid stop
 
-Перестроим кеш
+Rebuild the cache
 
     squid -z
 
-И снова запустим Squid
+And run Squid again
 
     /etc/init.d/squid start
 
-После любого изменения списков или конфигурации Squid, его необходимо перезагружать командой
+After any changes to lists or Squid configuration, it must be reloaded with the command
 
     /etc/init.d/squid restart
-
-Также можете изменить страницу запрета доступа (работает только на HTTP) по пути /usr/share/squid/errors/~Russian-1251. Ищите в папке файл ERR_ACCESS_DENIED и редактируете его. Синтаксис файла — HTML.
+    
+You can also change the access restriction page (works only on HTTP) under the path / usr / share / squid / errors / ~ Russian-1251. Look in the folder for the ERR_ACCESS_DENIED file and edit it. The file syntax is HTML.
     
 # Links
 
