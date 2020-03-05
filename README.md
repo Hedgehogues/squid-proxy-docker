@@ -1,4 +1,14 @@
-e# squid-proxy is transpanent proxy server
+# Docker
+
+You can 
+
+    docker run -p 3128:3128 squid
+    
+Or you can use docker-compose:
+
+    docker-compose up
+
+# squid-proxy is transpanent proxy server
 
 Minimal config:
 
@@ -197,7 +207,7 @@ The eighth block sets the cache and log of our Squid. Here it is worth noting on
 
 This completes the setup of squid.conf. We save the file and proceed to the creation of the certificate and lists.
 
-### Starting 
+# Starting 
 
 Let's go to the folder with Squid
 
