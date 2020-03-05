@@ -8,4 +8,4 @@ RUN sh ./generate_cert_docker.sh
 RUN touch blacklist && touch whitelist && cp whitelist whitelist_ssl && cp blacklist blacklist_ssl
 RUN /etc/init.d/squid stop
 RUN chmod 755 entrypoint.sh
-ENTRYPOINT ["entrypoint.sh"]
+ENTRYPOINT ["./entrypoint.sh"]
