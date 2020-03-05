@@ -1,4 +1,4 @@
-# squid-proxy is transpanent proxy server
+e# squid-proxy is transpanent proxy server
 
 Minimal config:
 
@@ -173,7 +173,7 @@ The seventh block determines the access parameters using the HTTPS protocol. Her
 
     sslcrtd_program /usr/lib/squid/ssl_crtd -s /var/lib/ssl_db -M 4MB
 
-# The eighth block
+### The eighth block
 
 The eighth block sets the cache and log of our Squid. Here it is worth noting only the logfile_rotate parameter, which indicates the number of days during which the log is stored.
 
