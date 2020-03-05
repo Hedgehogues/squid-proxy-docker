@@ -11,6 +11,8 @@ Or you can use docker-compose:
 squid listening 3128 port. For test, you can use curl with trace:
 
     curl -x 0.0.0.0:3128 yandex.ru --trace curl.log
+    
+We use any scripts from another [repo](https://github.com/sameersbn/docker-squid)
 
 # squid-proxy is transpanent proxy server
 
