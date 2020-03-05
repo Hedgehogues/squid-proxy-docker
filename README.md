@@ -7,6 +7,10 @@ You can
 Or you can use docker-compose:
 
     docker-compose up
+    
+squid listening 3128 port. For test, you can use curl with trace:
+
+    curl -x 0.0.0.0:3128 yandex.ru --trace curl.log
 
 # squid-proxy is transpanent proxy server
 
