@@ -14,6 +14,8 @@ squid listening 3128 port. For test, you can use curl with trace:
     
 We use any scripts from another [repo](https://github.com/sameersbn/docker-squid)
 
+You will have a problem with ports.
+
 # squid-proxy is transpanent proxy server
 
 Minimal config:
